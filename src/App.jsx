@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
-import { LogOut, Save } from 'lucide-react';
+import { useState } from 'react';
+import { LogOut } from 'lucide-react';
 
 // ⚙️ CONFIGURACIÓN
 const CODIGOS_VALIDOS = ['MUNDIAL2026', 'QUINIELAOK', 'FUTBOL123'];
 
-// 🌍 BANDERAS POR PAÍS
+// 🌍 BANDERAS POR PAÍS (Grandes y visibles)
 const BANDERAS = {
   'México': '🇲🇽', 'Sudáfrica': '🇿🇦', 'Corea del Sur': '🇰🇷', 'Repechaje UEFA': '🇪🇺',
   'Canadá': '🇨🇦', 'Suiza': '🇨🇭', 'Catar': '🇶🇦', 'Italia': '🇮🇹', 'Gales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿', 'Bosnia': '🇧🇦',
@@ -20,7 +20,7 @@ const BANDERAS = {
   'Inglaterra': '🇬🇧', 'Croacia': '🇭🇷', 'Panamá': '🇵🇦', 'Ghana': '🇬🇭'
 };
 
-// 📊 PARTIDOS FASE GRUPOS (Primeros 18 de ejemplo)
+// 📊 PARTIDOS FASE GRUPOS
 const PARTIDOS_GRUPOS = [
   { id: 1, grupo: 'A', equipo1: 'México', equipo2: 'Sudáfrica', fecha: '2026-06-11', hora_local: '14:00' },
   { id: 2, grupo: 'A', equipo1: 'Corea del Sur', equipo2: 'Repechaje UEFA', fecha: '2026-06-11', hora_local: '21:00' },
@@ -56,65 +56,39 @@ const PARTIDOS_KNOCKOUT = [
   { id: 80, fase: '16avos', equipo1: 'Colombia', equipo2: 'Suiza', fecha: '2026-07-01' },
 ];
 
-// 🎯 FUNCIÓN PARA CALCULAR PUNTOS
-const calcularPuntosPartido = (partido, prediccion, resultado) => {
-  if (!prediccion) return 0;
-  
-  let puntos = 0;
-  
-  // Marcador exacto = 3 puntos
-  if (prediccion.m_e1 == resultado?.m_e1 && prediccion.m_e2 == resultado?.m_e2) {
-    puntos += 3;
-  }
-  // Ganador o empate = 1 punto
-  else if (prediccion.m_e1 == prediccion.m_e2 && resultado?.m_e1 == resultado?.m_e2) {
-    puntos += 1; // ambos predicen empate
-  }
-  else if (prediccion.m_e1 > prediccion.m_e2 && resultado?.m_e1 > resultado?.m_e2) {
-    puntos += 1; // ambos predicen E1
-  }
-  else if (prediccion.m_e1 < prediccion.m_e2 && resultado?.m_e1 < resultado?.m_e2) {
-    puntos += 1; // ambos predicen E2
-  }
-  
-  // Equipos que pasan = 5 puntos cada uno
-  if (prediccion.pasa_e1 === resultado?.pasa_e1) puntos += 5;
-  if (prediccion.pasa_e2 === resultado?.pasa_e2) puntos += 5;
-  
-  return puntos;
-};
+// 📋 EQUIPOS PARA CLASIFICACIÓN (Fase Grupos)
+const TODOS_EQUIPOS_GRUPOS = ['México', 'Corea del Sur', 'Sudáfrica', 'Canadá', 'Italia', 'Suiza', 'Catar', 'Brasil', 'Marruecos', 'Haití', 'Escocia', 'Estados Unidos', 'Paraguay', 'Australia', 'Turquía', 'Alemania', 'Curazao', 'Ecuador', 'Países Bajos', 'Japón', 'Túnez'];
 
-export default function QuinielaMundial() {
+export default function TorneoMundialista() {
   const [page, setPage] = useState('invitacion');
   const [user, setUser] = useState(null);
   const [fase, setFase] = useState('grupos');
+  const [subPestana, setSubPestana] = useState('predicciones'); // 'predicciones' o 'clasificacion'
   const [codigoIngresado, setCodigoIngresado] = useState('');
   const [codigoError, setCodigoError] = useState('');
   const [loading, setLoading] = useState(false);
   const [guardadas, setGuardadas] = useState(false);
   const [expandedGrupo, setExpandedGrupo] = useState('A');
   
-  // Estado de predicciones
+  // Estado de predicciones (SOLO GOLES)
   const [prediccionesGrupos, setPrediccionesGrupos] = useState({});
   const [prediccionesKnockout, setPrediccionesKnockout] = useState({});
   
-  // Resultados simulados (para demo)
-  const resultados = {
-    1: { m_e1: 2, m_e2: 1, pasa_e1: true, pasa_e2: false },
-    2: { m_e1: 1, m_e2: 0, pasa_e1: true, pasa_e2: false },
-  };
+  // Estado de clasificación
+  const [equiposPasan, setEquiposPasan] = useState({});
+  const [mejoresTerceros, setMejoresTerceros] = useState({});
   
-  // Rankings simulados
+  // Rankings
   const [rankingGrupos] = useState([
-    { nombre: 'Juan Pérez', puntos: 256, email: 'juan@example.com' },
-    { nombre: 'María García', puntos: 242, email: 'maria@example.com' },
-    { nombre: 'Carlos López', puntos: 235, email: 'carlos@example.com' },
+    { nombre: 'Juan Pérez', puntos: 256 },
+    { nombre: 'María García', puntos: 242 },
+    { nombre: 'Carlos López', puntos: 235 },
   ]);
   
   const [rankingKnockout] = useState([
-    { nombre: 'Juan Pérez', puntos: 85, email: 'juan@example.com' },
-    { nombre: 'Carlos López', puntos: 78, email: 'carlos@example.com' },
-    { nombre: 'María García', puntos: 72, email: 'maria@example.com' },
+    { nombre: 'Juan Pérez', puntos: 85 },
+    { nombre: 'Carlos López', puntos: 78 },
+    { nombre: 'María García', puntos: 72 },
   ]);
   
   const [rankingConsolidado] = useState([
@@ -154,6 +128,14 @@ export default function QuinielaMundial() {
     setGuardadas(false);
   };
 
+  const handleEquipoPasa = (equipo) => {
+    setEquiposPasan(prev => ({ ...prev, [equipo]: !prev[equipo] }));
+  };
+
+  const handleMejorTercero = (equipo) => {
+    setMejoresTerceros(prev => ({ ...prev, [equipo]: !prev[equipo] }));
+  };
+
   const handleLogout = () => {
     setUser(null);
     setPage('invitacion');
@@ -166,8 +148,8 @@ export default function QuinielaMundial() {
         <div style={{ background: '#1a2847', border: '2px solid #f0a500', borderRadius: '16px', padding: '40px', maxWidth: '550px', width: '100%' }}>
           <div style={{ textAlign: 'center', marginBottom: '30px' }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>⚽</div>
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#f0a500', margin: 0 }}>QUINIELA MUNDIAL 2026</h1>
-            <p style={{ color: '#8b949e', margin: '12px 0 0 0', fontSize: '13px' }}>Predicciones • Rankings • Premios</p>
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#f0a500', margin: 0 }}>TORNEO MUNDIALISTA FIFA 2026</h1>
+            <p style={{ color: '#8b949e', margin: '12px 0 0 0', fontSize: '13px' }}>Local Trading Colombia</p>
           </div>
 
           <div style={{ background: '#0d1117', padding: '20px', borderRadius: '12px', marginBottom: '20px', borderLeft: '4px solid #58a6ff' }}>
@@ -233,14 +215,14 @@ export default function QuinielaMundial() {
           {/* HEADER */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #30363d' }}>
             <div>
-              <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#f0a500', margin: 0 }}>⚽ MUNDIAL 2026</h1>
-              <p style={{ color: '#8b949e', fontSize: '13px', margin: '4px 0 0 0' }}>{user?.nombre}</p>
+              <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#f0a500', margin: 0 }}>⚽ TORNEO MUNDIALISTA FIFA 2026</h1>
+              <p style={{ color: '#8b949e', fontSize: '13px', margin: '4px 0 0 0' }}>Local Trading Colombia • {user?.nombre}</p>
             </div>
             <button onClick={handleLogout} style={{ background: '#f85149', border: 'none', color: 'white', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}>🚪 Salir</button>
           </div>
 
-          {/* 3 PESTAÑAS */}
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '30px', borderBottom: '1px solid #30363d', paddingBottom: '16px', flexWrap: 'wrap' }}>
+          {/* 3 PESTAÑAS PRINCIPALES */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', borderBottom: '1px solid #30363d', paddingBottom: '16px', flexWrap: 'wrap' }}>
             {[
               { id: 'grupos', label: '📌 FASE GRUPOS' },
               { id: 'knockout', label: '🏆 FASE KNOCKOUT' },
@@ -248,7 +230,7 @@ export default function QuinielaMundial() {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setFase(tab.id)}
+                onClick={() => { setFase(tab.id); setSubPestana('predicciones'); }}
                 style={{
                   background: fase === tab.id ? '#f0a500' : '#161b22',
                   color: fase === tab.id ? '#0f0c1f' : '#8b949e',
@@ -274,138 +256,237 @@ export default function QuinielaMundial() {
           {/* FASE GRUPOS */}
           {fase === 'grupos' && (
             <div>
-              <h2 style={{ color: '#f0a500', marginBottom: '20px', fontSize: '20px' }}>📌 FASE DE GRUPOS (72 partidos)</h2>
-              
-              {/* Selector de grupos */}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '8px' }}>
-                {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].map(g => (
-                  <button
-                    key={g}
-                    onClick={() => setExpandedGrupo(g)}
-                    style={{
-                      background: expandedGrupo === g ? '#f0a500' : '#161b22',
-                      color: expandedGrupo === g ? '#0f0c1f' : '#8b949e',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      fontSize: '13px'
-                    }}
-                  >
-                    {g}
-                  </button>
-                ))}
+              {/* SUB-PESTAÑAS: Predicciones y Clasificación */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+                <button
+                  onClick={() => setSubPestana('predicciones')}
+                  style={{
+                    background: subPestana === 'predicciones' ? '#58a6ff' : '#161b22',
+                    color: subPestana === 'predicciones' ? 'white' : '#8b949e',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '13px'
+                  }}
+                >
+                  ⚽ PREDICCIONES
+                </button>
+                <button
+                  onClick={() => setSubPestana('clasificacion')}
+                  style={{
+                    background: subPestana === 'clasificacion' ? '#58a6ff' : '#161b22',
+                    color: subPestana === 'clasificacion' ? 'white' : '#8b949e',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '13px'
+                  }}
+                >
+                  🏆 CLASIFICACIÓN
+                </button>
               </div>
 
-              {/* Partidos */}
-              <div style={{ display: 'grid', gap: '12px', marginBottom: '40px' }}>
-                {grupos[expandedGrupo]?.map(partido => (
-                  <div key={partido.id} style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '16px' }}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '15px', fontWeight: '600', color: '#e6edf3' }}>
-                        {BANDERAS[partido.equipo1] || '⚽'} {partido.equipo1} vs {BANDERAS[partido.equipo2] || '⚽'} {partido.equipo2}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '4px' }}>
-                        {partido.fecha} • {partido.hora_local}
-                      </div>
-                    </div>
+              {/* SUB-PESTAÑA: PREDICCIONES */}
+              {subPestana === 'predicciones' && (
+                <div>
+                  <h2 style={{ color: '#f0a500', marginBottom: '20px', fontSize: '20px' }}>⚽ PREDICCIONES FASE GRUPOS</h2>
+                  
+                  {/* Selector de grupos */}
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '8px' }}>
+                    {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].map(g => (
+                      <button
+                        key={g}
+                        onClick={() => setExpandedGrupo(g)}
+                        style={{
+                          background: expandedGrupo === g ? '#f0a500' : '#161b22',
+                          color: expandedGrupo === g ? '#0f0c1f' : '#8b949e',
+                          border: 'none',
+                          padding: '10px 16px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          fontSize: '13px'
+                        }}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        placeholder="Goles E1"
-                        value={prediccionesGrupos[partido.id]?.m_e1 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'm_e1', e.target.value)}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#f0a500', padding: '8px', borderRadius: '4px', fontSize: '12px', textAlign: 'center' }}
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        placeholder="Goles E2"
-                        value={prediccionesGrupos[partido.id]?.m_e2 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'm_e2', e.target.value)}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#f0a500', padding: '8px', borderRadius: '4px', fontSize: '12px', textAlign: 'center' }}
-                      />
-                      <select
-                        value={prediccionesGrupos[partido.id]?.pasa_e1 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'pasa_e1', e.target.value === 'true')}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#e6edf3', padding: '8px', borderRadius: '4px', fontSize: '12px' }}
-                      >
-                        <option value="">Pasa E1?</option>
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                      </select>
-                      <select
-                        value={prediccionesGrupos[partido.id]?.pasa_e2 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'pasa_e2', e.target.value === 'true')}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#e6edf3', padding: '8px', borderRadius: '4px', fontSize: '12px' }}
-                      >
-                        <option value="">Pasa E2?</option>
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                      </select>
+                  {/* Partidos - SOLO CON 2 CELDAS: GOLES E1 Y GOLES E2 */}
+                  <div style={{ display: 'grid', gap: '12px', marginBottom: '40px' }}>
+                    {grupos[expandedGrupo]?.map(partido => (
+                      <div key={partido.id} style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '16px' }}>
+                        <div style={{ marginBottom: '12px' }}>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: '#e6edf3', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '24px' }}>{BANDERAS[partido.equipo1] || '⚽'}</span>
+                            <span>{partido.equipo1}</span>
+                            <span style={{ color: '#8b949e' }}>vs</span>
+                            <span>{partido.equipo2}</span>
+                            <span style={{ fontSize: '24px' }}>{BANDERAS[partido.equipo2] || '⚽'}</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '4px' }}>
+                            {partido.fecha} • {partido.hora_local}
+                          </div>
+                        </div>
+
+                        {/* SOLO 2 INPUTS: GOLES */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <label style={{ fontSize: '11px', color: '#8b949e', display: 'block', marginBottom: '6px' }}>GOLES {partido.equipo1}</label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="10"
+                              placeholder="0"
+                              value={prediccionesGrupos[partido.id]?.m_e1 ?? ''}
+                              onChange={(e) => handlePrediccion(partido.id, 'm_e1', e.target.value)}
+                              style={{ background: '#0d1117', border: '2px solid #30363d', color: '#f0a500', padding: '12px', borderRadius: '6px', fontSize: '18px', fontWeight: '600', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div style={{ textAlign: 'center' }}>
+                            <label style={{ fontSize: '11px', color: '#8b949e', display: 'block', marginBottom: '6px' }}>GOLES {partido.equipo2}</label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="10"
+                              placeholder="0"
+                              value={prediccionesGrupos[partido.id]?.m_e2 ?? ''}
+                              onChange={(e) => handlePrediccion(partido.id, 'm_e2', e.target.value)}
+                              style={{ background: '#0d1117', border: '2px solid #30363d', color: '#f0a500', padding: '12px', borderRadius: '6px', fontSize: '18px', fontWeight: '600', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Ranking Grupos */}
+                  <div style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '20px', marginBottom: '100px' }}>
+                    <h3 style={{ color: '#f0a500', marginBottom: '16px' }}>🥇 RANKING FASE GRUPOS</h3>
+                    <div style={{ display: 'grid', gap: '8px' }}>
+                      {rankingGrupos.map((r, idx) => (
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#0d1117', borderRadius: '6px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '600', color: '#e6edf3' }}>
+                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {r.nombre}
+                          </div>
+                          <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#3fb950' }}>{r.puntos} pts</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Ranking Grupos */}
-              <div style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '20px', marginBottom: '100px' }}>
-                <h3 style={{ color: '#f0a500', marginBottom: '16px' }}>🥇 RANKING FASE GRUPOS</h3>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  {rankingGrupos.map((r, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#0d1117', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e6edf3' }}>
-                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'} {r.nombre}
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#3fb950' }}>{r.puntos} pts</div>
-                    </div>
-                  ))}
                 </div>
-              </div>
+              )}
+
+              {/* SUB-PESTAÑA: CLASIFICACIÓN */}
+              {subPestana === 'clasificacion' && (
+                <div>
+                  <h2 style={{ color: '#f0a500', marginBottom: '20px', fontSize: '20px' }}>🏆 CLASIFICACIÓN FASE GRUPOS</h2>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '100px' }}>
+                    {/* EQUIPOS QUE PASAN */}
+                    <div style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '20px' }}>
+                      <h3 style={{ color: '#3fb950', marginBottom: '16px', fontSize: '16px' }}>✅ EQUIPOS QUE PASAN A OCTAVOS</h3>
+                      <p style={{ fontSize: '12px', color: '#8b949e', marginBottom: '16px' }}>Selecciona 2 equipos por grupo</p>
+                      
+                      <div style={{ display: 'grid', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                        {TODOS_EQUIPOS_GRUPOS.map((equipo, idx) => (
+                          <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: '#0d1117', borderRadius: '6px', cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={equiposPasan[equipo] || false}
+                              onChange={() => handleEquipoPasa(equipo)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <span style={{ fontSize: '24px' }}>{BANDERAS[equipo] || '⚽'}</span>
+                            <span style={{ color: '#e6edf3', fontSize: '14px' }}>{equipo}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div style={{ marginTop: '12px', fontSize: '12px', color: '#8b949e' }}>
+                        Seleccionados: {Object.values(equiposPasan).filter(Boolean).length}
+                      </div>
+                    </div>
+
+                    {/* MEJORES TERCEROS */}
+                    <div style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '20px' }}>
+                      <h3 style={{ color: '#58a6ff', marginBottom: '16px', fontSize: '16px' }}>⭐ MEJORES TERCEROS</h3>
+                      <p style={{ fontSize: '12px', color: '#8b949e', marginBottom: '16px' }}>Selecciona 8 equipos</p>
+                      
+                      <div style={{ display: 'grid', gap: '12px', maxHeight: '400px', overflowY: 'auto' }}>
+                        {TODOS_EQUIPOS_GRUPOS.map((equipo, idx) => (
+                          <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: '#0d1117', borderRadius: '6px', cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={mejoresTerceros[equipo] || false}
+                              onChange={() => handleMejorTercero(equipo)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                              disabled={Object.values(mejoresTerceros).filter(Boolean).length >= 8 && !mejoresTerceros[equipo]}
+                            />
+                            <span style={{ fontSize: '24px' }}>{BANDERAS[equipo] || '⚽'}</span>
+                            <span style={{ color: '#e6edf3', fontSize: '14px' }}>{equipo}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div style={{ marginTop: '12px', fontSize: '12px', color: '#8b949e' }}>
+                        Seleccionados: {Object.values(mejoresTerceros).filter(Boolean).length} / 8
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* FASE KNOCKOUT */}
           {fase === 'knockout' && (
             <div>
-              <h2 style={{ color: '#f0a500', marginBottom: '20px', fontSize: '20px' }}>🏆 FASE KNOCKOUT (16avos - Final)</h2>
+              <h2 style={{ color: '#f0a500', marginBottom: '20px', fontSize: '20px' }}>🏆 FASE KNOCKOUT</h2>
               
               <div style={{ display: 'grid', gap: '12px', marginBottom: '40px' }}>
                 {PARTIDOS_KNOCKOUT.map(partido => (
                   <div key={partido.id} style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#e6edf3' }}>
-                        {BANDERAS[partido.equipo1] || '⚽'} {partido.equipo1} vs {BANDERAS[partido.equipo2] || '⚽'} {partido.equipo2}
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#e6edf3', display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                        <span style={{ fontSize: '24px' }}>{BANDERAS[partido.equipo1] || '⚽'}</span>
+                        {partido.equipo1}
                       </span>
-                      <span style={{ background: '#0d1117', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', color: '#8b949e' }}>
-                        {partido.fase}
+                      <span style={{ color: '#8b949e', margin: '0 8px' }}>vs</span>
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#e6edf3', display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'flex-end' }}>
+                        {partido.equipo2}
+                        <span style={{ fontSize: '24px' }}>{BANDERAS[partido.equipo2] || '⚽'}</span>
                       </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        placeholder="Goles E1"
-                        value={prediccionesKnockout[partido.id]?.m_e1 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'm_e1', e.target.value)}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#f0a500', padding: '8px', borderRadius: '4px', fontSize: '12px', textAlign: 'center' }}
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        placeholder="Goles E2"
-                        value={prediccionesKnockout[partido.id]?.m_e2 ?? ''}
-                        onChange={(e) => handlePrediccion(partido.id, 'm_e2', e.target.value)}
-                        style={{ background: '#0d1117', border: '1px solid #30363d', color: '#f0a500', padding: '8px', borderRadius: '4px', fontSize: '12px', textAlign: 'center' }}
-                      />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <label style={{ fontSize: '11px', color: '#8b949e', display: 'block', marginBottom: '6px' }}>GOLES</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="10"
+                          placeholder="0"
+                          value={prediccionesKnockout[partido.id]?.m_e1 ?? ''}
+                          onChange={(e) => handlePrediccion(partido.id, 'm_e1', e.target.value)}
+                          style={{ background: '#0d1117', border: '2px solid #30363d', color: '#f0a500', padding: '12px', borderRadius: '6px', fontSize: '18px', fontWeight: '600', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <label style={{ fontSize: '11px', color: '#8b949e', display: 'block', marginBottom: '6px' }}>GOLES</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="10"
+                          placeholder="0"
+                          value={prediccionesKnockout[partido.id]?.m_e2 ?? ''}
+                          onChange={(e) => handlePrediccion(partido.id, 'm_e2', e.target.value)}
+                          style={{ background: '#0d1117', border: '2px solid #30363d', color: '#f0a500', padding: '12px', borderRadius: '6px', fontSize: '18px', fontWeight: '600', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
