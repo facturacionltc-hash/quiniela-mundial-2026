@@ -7,8 +7,8 @@ const CODIGOS_VALIDOS = ['MUNDIAL2026', 'QUINIELAOK', 'FUTBOL123'];
 // 🌍 BANDERAS POR PAÍS (Grandes y visibles)
 const BANDERAS = {
   'México': '🇲🇽', 'Sudáfrica': '🇿🇦', 'Corea del Sur': '🇰🇷', 'Repechaje UEFA': '🇪🇺',
-  'Canadá': '🇨🇦', 'Suiza': '🇨🇭', 'Catar': '🇶🇦', 'Italia': '🇮🇹', 'Gales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿', 'Bosnia': '🇧🇦',
-  'Brasil': '🇧🇷', 'Marruecos': '🇲🇦', 'Haití': '🇭🇹', 'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Canadá': '🇨🇦', 'Suiza': '🇨🇭', 'Catar': '🇶🇦', 'Italia': '🇮🇹', 'Gales': 'Cymru', 'Bosnia': '🇧🇦',
+  'Brasil': '🇧🇷', 'Marruecos': '🇲🇦', 'Haití': '🇭🇹', 'Escocia': 'stk',
   'Estados Unidos': '🇺🇸', 'Paraguay': '🇵🇾', 'Australia': '🇦🇺', 'Turquía': '🇹🇷', 'Rumania': '🇷🇴',
   'Alemania': '🇩🇪', 'Curazao': '🇨🇼', 'Costa de Marfil': '🇨🇮', 'Ecuador': '🇪🇨',
   'Países Bajos': '🇳🇱', 'Japón': '🇯🇵', 'Túnez': '🇹🇳',
