@@ -296,3 +296,39 @@ border-bottom:1px solid #30363d;
 .table-row:hover{
 background:#1f2937;
 }
+/* MENU MOVIL */
+
+.menu-toggle{
+display:none;
+font-size:30px;
+cursor:pointer;
+color:white;
+}
+
+@media(max-width:768px){
+
+.menu{
+display:none;
+flex-direction:column;
+background:#161b22;
+position:absolute;
+top:70px;
+right:20px;
+padding:20px;
+border-radius:15px;
+width:200px;
+}
+
+.menu.active{
+display:flex;
+}
+
+.menu a{
+margin:10px 0;
+}
+
+.menu-toggle{
+display:block;
+}
+
+}
