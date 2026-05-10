@@ -6,4 +6,40 @@ menu.classList.toggle("active");
 
 }
 
-console.log("LTC Quiniela iniciada");
+/* GUARDAR PRONOSTICO */
+
+function guardarPronostico(){
+
+const brasil =
+document.getElementById("brasil").value;
+
+const argentina =
+document.getElementById("argentina").value;
+
+localStorage.setItem("brasil", brasil);
+
+localStorage.setItem("argentina", argentina);
+
+alert("Pronóstico guardado ⚽");
+
+}
+
+/* CARGAR DATOS */
+
+window.onload = function(){
+
+if(localStorage.getItem("brasil")){
+
+document.getElementById("brasil").value =
+localStorage.getItem("brasil");
+
+}
+
+if(localStorage.getItem("argentina")){
+
+document.getElementById("argentina").value =
+localStorage.getItem("argentina");
+
+}
+
+}
