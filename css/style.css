@@ -437,3 +437,52 @@ transition:0.3s;
 .match-card button:hover{
 opacity:0.8;
 }
+/* LOGIN */
+
+.login-page{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+padding:20px;
+}
+
+.login-card{
+background:#161b22;
+padding:40px;
+border-radius:25px;
+width:100%;
+max-width:400px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.login-card h1{
+text-align:center;
+color:#00aaff;
+}
+
+.login-card input{
+padding:15px;
+border:none;
+border-radius:12px;
+background:#0d1117;
+color:white;
+font-size:16px;
+}
+
+.login-card button{
+padding:15px;
+border:none;
+border-radius:12px;
+background:#00aaff;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+#message{
+text-align:center;
+color:#ffd700;
+}
