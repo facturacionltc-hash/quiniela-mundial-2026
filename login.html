@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login - Quiniela LTC</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<section class="login-page">
+
+<div class="login-card">
+
+<h1>⚽ Quiniela LTC 2026</h1>
+
+<input type="email" id="email" placeholder="Correo">
+
+<input type="password" id="password" placeholder="Contraseña">
+
+<button onclick="register()">
+Registrarse
+</button>
+
+<button onclick="login()">
+Iniciar Sesión
+</button>
+
+<p id="message"></p>
+
+</div>
+
+</section>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyCYfMwlrFsNgy1pXGL6ttmtZmum4-6Rs3w",
+
+authDomain: "quiniela-ltc-2026.firebaseapp.com",
+
+projectId: "quiniela-ltc-2026",
+
+storageBucket: "quiniela-ltc-2026.firebasestorage.app",
+
+messagingSenderId: "832152139480",
+
+appId: "1:832152139480:web:b4b5116e648c9593df49ad"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+window.register = function(){
+
+const email =
+document.getElementById("email").value;
+
+const password =
+document.getElementById("password").value;
+
+createUserWithEmailAndPassword(auth, email, password)
+
+.then(() => {
+
+document.getElementById("message").innerHTML =
+"Usuario registrado ✅";
+
+})
+
+.catch((error) => {
+
+document.getElementById("message").innerHTML =
+error.message;
+
+});
+
+}
+
+window.login = function(){
+
+const email =
+document.getElementById("email").value;
+
+const password =
+document.getElementById("password").value;
+
+signInWithEmailAndPassword(auth, email, password)
+
+.then(() => {
+
+window.location.href = "index.html";
+
+})
+
+.catch((error) => {
+
+document.getElementById("message").innerHTML =
+error.message;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
