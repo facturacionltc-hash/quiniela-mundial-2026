@@ -1,12 +1,10 @@
-function toggleMenu(){
+function toggleMenu() {
 
 const menu = document.querySelector(".menu");
 
 menu.classList.toggle("active");
 
 }
-
-/* PARTIDOS */
 
 const matches = [
 
@@ -43,8 +41,6 @@ time:"8:00 PM"
 }
 
 ];
-
-/* MOSTRAR PARTIDOS */
 
 const container =
 document.getElementById("matches-container");
@@ -103,8 +99,6 @@ Guardar Pronóstico
 
 }
 
-/* GUARDAR */
-
 function savePrediction(index){
 
 const team1 =
@@ -124,8 +118,6 @@ team2
 alert("Pronóstico guardado ⚽");
 
 }
-
-/* CARGAR */
 
 window.onload = function(){
 
